@@ -31,7 +31,9 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: |
+          dotnet workload restore
+          dotnet restore
 
       - name: Run Unit Tests
         run: |
