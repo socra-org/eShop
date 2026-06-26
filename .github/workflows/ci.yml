@@ -39,7 +39,7 @@ jobs:
           dotnet test \
             --configuration Release \
             --no-restore \
-            --logger trx \
+            --report-trx \
             --solution eShop.Web.slnf
 
       - name: Upload Test Results
