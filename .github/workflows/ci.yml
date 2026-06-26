@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches: 
+      - main
+      - develop
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOTNET_VERSION: "9.0.x"
+
+jobs:
+  unit-test:
+    name: Unit Test
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run Unit Tests
+        run: |
+          dotnet test \
+            --configuration Release \
+            --no-restore \
+            --logger trx
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: "**/*.trx"
+
+  build:
+    name: Build
+    runs-on: self-hosted
+    needs: unit-test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish
+        run: |
+          dotnet publish \
+            --configuration Release \
+            --output ./publish
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application
+          path: publish/
+
+  publish-artifact:
+    name: Publish Artifact
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: application
+          path: ./artifact
+
+      # Option 1 (recommended): keep in GitHub Actions Artifacts
+      - name: Upload Final Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: ./artifact
