@@ -47,7 +47,7 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: "**/*.trx"
+          path: "**/TestResults/**/*.trx"
 
   build:
     name: Build
