@@ -19,6 +19,9 @@ on:
   schedule:
     - cron: '20 9 * * 6'
 
+env:
+  CODEQL_RAM: 2048
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
